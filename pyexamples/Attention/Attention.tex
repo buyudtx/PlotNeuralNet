@@ -1,0 +1,104 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone} 
+\usepackage{import}
+\subimport{../layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image 
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}   
+\def\SumColor{rgb:blue,5;green,15}
+
+\def\xf{rgb:red,25;green,69;blue,104}
+\def\zf{rgb:green,6;blue,3}
+\def\fone{rgb:green,6;blue,3;white,2}
+\def\ftwo{rgb:red,25;green,69;blue,104;white,10}
+\def\ff{rgb:red,3;black,0.3;white,2}
+\def\PlusColor{rgb:blue,5;green,15;white,5}
+\definecolor{S}{RGB}{140,199,191}
+\definecolor{out}{RGB}{103,171,214}
+\definecolor{conv}{RGB}{238,223,200}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\pic[shift={(0,0,0)}] at (0,0,0) 
+    {Box={
+        name=x,
+        caption={search region feature},
+        fill=\xf,
+        opacity=0.5,
+        height=15,
+        width=4,
+        depth=15
+        }
+    };
+
+\pic[shift={(0,4,0)}] at (x-north) 
+    {Box={
+        name=z,
+        caption={template feature},
+        fill=\zf,
+        opacity=0.5,
+        height=10,
+        width=4,
+        depth=10
+        }
+    };
+
+\pic[shift={(3,3,0)}] at (x-east) 
+    {Box={
+        name=PAM,
+        caption={PAM},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=15,
+        width=15,
+        depth=0
+        }
+    };
+
+\draw [connection]  (x-east)    -| node {\midarrow} (PAM-south);
+
+\draw [connection]  (z-east)    -| node {\midarrow} (PAM-north);
+
+\pic[shift={(2,0,0)}] at (PAM-east) 
+{Box={
+		name=CAM,
+		caption={CAM},
+		xlabel={{, }},
+		zlabel=,
+		fill=\ConvColor,
+		height=15,
+		width=15,
+		depth=0
+	}
+};
+\draw [connection]  (PAM-east)    -- node {\midarrow} (CAM-west);
+
+\pic[shift={(2,0,0)}] at (CAM-east) 
+    {Box={
+        name=f,
+        caption={response feature map},
+        fill=\ff,
+        opacity=0.5,
+        height=15,
+        width=4,
+        depth=15
+        }
+    };
+    
+\draw [connection]  (CAM-east)    -- node {\midarrow} (f-west);
+
+\end{tikzpicture}
+\end{document}

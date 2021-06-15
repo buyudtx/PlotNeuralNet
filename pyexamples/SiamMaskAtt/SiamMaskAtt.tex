@@ -1,0 +1,208 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone} 
+\usepackage{import}
+\subimport{../layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image 
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}   
+\def\SumColor{rgb:blue,5;green,15}
+
+\def\xf{rgb:red,25;green,69;blue,104}
+\def\zf{rgb:green,6;blue,3}
+\def\fone{rgb:green,6;blue,3;white,2}
+\def\ftwo{rgb:red,25;green,69;blue,104;white,10}
+\def\ff{rgb:red,3;black,0.3;white,2}
+\def\PlusColor{rgb:blue,5;green,15;white,5}
+\definecolor{S}{RGB}{140,199,191}
+\definecolor{out}{RGB}{103,171,214}
+\definecolor{conv}{RGB}{238,223,200}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\pic[shift={(0,0,0)}] at (0,0,0) 
+    {Box={
+        name=x,
+        caption={search\\region\\287$\times$287$\times$3},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=15,
+        width=1,
+        depth=15
+        }
+    };
+
+\pic[shift={(0,4,0)}] at (x-north) 
+    {Box={
+        name=z,
+        caption={template\\127$\times$127$\times$3},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=10,
+        width=1,
+        depth=10
+        }
+    };
+
+\pic[shift={(2,0,0)}] at (z-east) 
+    {Box={
+        name=googlenet_z,
+        caption={GoogleNet},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=10,
+        width=10,
+        depth=0
+        }
+    };
+
+\pic[shift={(2,0,0)}] at (x-east) 
+    {Box={
+        name=googlenet_x,
+        caption={GoogleNet},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=10,
+        width=10,
+        depth=0
+        }
+    };
+
+\pic[shift={(2,0,0)}] at (googlenet_z-east) 
+    {Box={
+        name=zf,
+        caption={zf [256,25,25]},
+        fill=\zf,
+        opacity=0.5,
+        height=10,
+        width=4,
+        depth=10
+        }
+    };
+
+\pic[shift={(2,0,0)}] at (googlenet_x-east) 
+    {Box={
+        name=xf,
+        caption={xf [256,31,31]},
+        fill=\xf,
+        opacity=0.5,
+        height=15,
+        width=4,
+        depth=15
+        }
+    };
+
+\draw [connection]  (z-east)    -- node {\midarrow} (googlenet_z-west);
+
+\draw [connection]  (x-east)    -- node {\midarrow} (googlenet_x-west);
+
+\draw [connection]  (googlenet_z-east)    -- node {\midarrow} (zf-west);
+
+\draw [connection]  (googlenet_x-east)    -- node {\midarrow} (xf-west);
+
+\pic[shift={(2,2,0)}] at (xf-east) 
+    {Box={
+        name=attention,
+        caption={Attention Similarity Module},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=15,
+        width=15,
+        depth=0
+        }
+    };
+
+    \pic[shift={(3,0,0)}] at (attention-east) 
+        {Box={
+            name=f,
+            caption={response feature map [256,31,31]},
+            fill=\ff,
+            opacity=0.5,
+            height=15,
+            width=4,
+            depth=15
+            }
+        };
+    
+\draw [connection]  (zf-east)    -- node {\midarrow} (attention-west);
+
+\draw [connection]  (xf-east)    -- node {\midarrow} (attention-west);
+
+\draw [connection]  (attention-east)    -- node {\midarrow} (f-west);
+
+\pic[shift={(2,3,0)}] at (f-east) 
+    {Box={
+        name=cls,
+        caption={CNN},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=15,
+        width=15,
+        depth=0
+        }
+    };
+
+\pic[shift={(2,-3,0)}] at (f-east) 
+    {Box={
+        name=reg,
+        caption={CNN},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=15,
+        width=15,
+        depth=0
+        }
+    };
+
+\draw [connection]  (f-east)    -- node {\midarrow} (cls-west);
+
+\draw [connection]  (f-east)    -- node {\midarrow} (reg-west);
+
+    \pic[shift={(2,0,0)}] at (cls-east) 
+        {Box={
+            name=fc,
+            caption={cls},
+            fill=\ff,
+            opacity=0.5,
+            height=15,
+            width=2,
+            depth=0
+            }
+        };
+    
+    \pic[shift={(2,0,0)}] at (reg-east) 
+        {Box={
+            name=fr,
+            caption={reg},
+            fill=\ff,
+            opacity=0.5,
+            height=15,
+            width=4,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (cls-east)    -- node {\midarrow} (fc-west);
+
+\draw [connection]  (reg-east)    -- node {\midarrow} (fr-west);
+
+\end{tikzpicture}
+\end{document}

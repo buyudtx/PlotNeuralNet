@@ -1,0 +1,145 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone} 
+\usepackage{import}
+\subimport{../layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image 
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}   
+\def\SumColor{rgb:blue,5;green,15}
+
+\def\xf{rgb:red,25;green,90;blue,120}
+\def\zf{rgb:green,6;blue,3;white,2}
+\def\fone{rgb:green,6;blue,3;white,2}
+\def\ftwo{rgb:red,25;green,69;blue,104;white,10}
+\def\ff{rgb:red,3;black,0.3;yellow,2}
+\def\PlusColor{rgb:blue,5;green,15;white,5}
+\definecolor{S}{RGB}{140,199,191}
+\definecolor{out}{RGB}{103,171,214}
+\definecolor{conv}{RGB}{238,223,200}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\pic[shift={(0,0,0)}] at (0,0,0) 
+    {Box={
+        name=f,
+        caption={$f$[C,H,W]},
+        fill=\xf,
+        opacity=0.5,
+        height=15,
+        width=4,
+        depth=15
+        }
+    };
+
+    \pic[shift={(1,4,0)}] at (f-east) 
+        {Box={
+            name=B,
+            caption={B[C,H$\times$W]},
+            fill=\ftwo,
+            opacity=0.5,
+            height=8,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (f-east)    -- node {\midarrow} (B-west);
+
+    \pic[shift={(1,0,0)}] at (f-east) 
+        {Box={
+            name=C,
+            caption={C[H$\times$W,C]},
+            fill=\ftwo,
+            opacity=0.5,
+            height=8,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (f-east)    -- node {\midarrow} (C-west);
+
+    \pic[shift={(1,-4,0)}] at (f-east) 
+        {Box={
+            name=D,
+            caption={D[C,H$\times$W]},
+            fill=\ftwo,
+            opacity=0.5,
+            height=8,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (f-east)    -- node {\midarrow} (D-west);
+
+\pic[shift={(1.5,-2,0)}] at (B-east) 
+    {Ball={
+        name=plus1,
+        fill=\PlusColor,
+        opacity=0.6,
+        radius=2,
+        logo=$\times$
+        }
+    };
+
+\draw [connection]  (B-east)    -| node {\midarrow} (plus1-north);
+
+\draw [connection]  (C-east)    -| node {\midarrow} (plus1-south);
+
+    \pic[shift={(1,0,0)}] at (plus1-east) 
+        {Box={
+            name=S,
+            caption={S[C,C]},
+            fill=\zf,
+            opacity=0.5,
+            height=10,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (plus1-east)    -- node {\midarrow} (S-west);
+
+\pic[shift={(6.5,0,0)}] at (D-east) 
+    {Ball={
+        name=plus2,
+        fill=\PlusColor,
+        opacity=0.6,
+        radius=2,
+        logo=$\times$
+        }
+    };
+
+\draw [connection]  (S-east)    -| node {\midarrow} (plus2-north);
+
+\draw [connection]  (D-east)    -- node {\midarrow} (plus2-west);
+
+    \pic[shift={(3,0,0)}] at (plus2-east) 
+        {Box={
+            name=out,
+            caption={out[C,H,W]},
+            fill=\ff,
+            opacity=0.5,
+            height=15,
+            width=4,
+            depth=15
+            }
+        };
+    
+\draw [connection]  (plus2-east)    -- node {\midarrow} (out-west);
+
+\end{tikzpicture}
+\end{document}

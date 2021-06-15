@@ -1,0 +1,247 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone} 
+\usepackage{import}
+\subimport{../layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image 
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}   
+\def\SumColor{rgb:blue,5;green,15}
+
+\def\xf{rgb:red,25;green,69;blue,104}
+\def\zf{rgb:green,6;blue,3}
+\def\fone{rgb:green,6;blue,3;white,2}
+\def\ftwo{rgb:red,25;green,69;blue,104;white,10}
+\def\ff{rgb:red,3;black,0.3;white,2}
+\def\fff{rgb:red,25;green,90;blue,120}
+\def\PlusColor{rgb:blue,5;green,15;white,5}
+\definecolor{S}{RGB}{140,199,191}
+\definecolor{out}{RGB}{103,171,214}
+\definecolor{conv}{RGB}{238,223,200}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\pic[shift={(0,0,0)}] at (0,0,0) 
+    {Box={
+        name=x,
+        caption={search region feature},
+        fill=\xf,
+        opacity=0.5,
+        height=15,
+        width=4,
+        depth=15
+        }
+    };
+
+\pic[shift={(1,0,0)}] at (x-east) 
+    {Box={
+        name=convB,
+        caption={conv 1$\times$1},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=5,
+        width=2,
+        depth=5
+        }
+    };
+
+\draw [connection]  (x-east)    -- node {\midarrow} (convB-west);
+
+    \pic[shift={(1,0,0)}] at (convB-east) 
+        {Box={
+            name=B,
+            caption={B[H$\times$W,C]},
+            fill=\ftwo,
+            opacity=0.5,
+            height=10,
+            width=8,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (convB-east)    -- node {\midarrow} (B-west);
+
+\pic[shift={(0,5,0)}] at (x-north) 
+    {Box={
+        name=z,
+        caption={template feature},
+        fill=\zf,
+        opacity=0.5,
+        height=10,
+        width=4,
+        depth=10
+        }
+    };
+
+\pic[shift={(1,-3,0)}] at (z-east) 
+    {Box={
+        name=convC,
+        caption={conv 1$\times$1},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=5,
+        width=2,
+        depth=5
+        }
+    };
+
+\draw [connection]  (z-east)    -- node {\midarrow} (convC-west);
+
+    \pic[shift={(1,0,0)}] at (convC-east) 
+        {Box={
+            name=C,
+            caption={C[C,h$\times$w]},
+            fill=\fone,
+            opacity=0.5,
+            height=5,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (convC-east)    -- node {\midarrow} (C-west);
+
+\pic[shift={(1,0,0)}] at (z-east) 
+    {Box={
+        name=convD,
+        caption={conv 1$\times$1},
+        xlabel={{, }},
+        zlabel=,
+        fill=\ConvColor,
+        height=5,
+        width=2,
+        depth=5
+        }
+    };
+
+\draw [connection]  (z-east)    -- node {\midarrow} (convD-west);
+
+    \pic[shift={(1,0,0)}] at (convD-east) 
+        {Box={
+            name=D,
+            caption={D[C,h$\times$w]},
+            fill=\fone,
+            opacity=0.5,
+            height=5,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (convD-east)    -- node {\midarrow} (D-west);
+
+\pic[shift={(1,-2,0)}] at (C-east) 
+    {Ball={
+        name=plus1,
+        fill=\PlusColor,
+        opacity=0.6,
+        radius=2,
+        logo=$\times$
+        }
+    };
+
+\draw [connection]  (B-east)    -| node {\midarrow} (plus1-south);
+
+\draw [connection]  (C-east)    -| node {\midarrow} (plus1-north);
+
+\pic[shift={(1,0,0)}] at (plus1-east) 
+    {Box={
+        name=softmax,
+        caption={SoftMax},
+        xlabel={{" ",""}},
+        zlabel=,
+        fill=\SoftmaxColor,
+        opacity=0.8,
+        height=3,
+        width=1.5,
+        depth=10
+        }
+    };
+
+\draw [connection]  (plus1-east)    -- node {\midarrow} (softmax-west);
+
+    \pic[shift={(1,0,0)}] at (softmax-east) 
+        {Box={
+            name=S,
+            caption={S[H$\times$W,h$\times$w]},
+            fill=\ff,
+            opacity=0.5,
+            height=5,
+            width=8,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (softmax-east)    -- node {\midarrow} (S-west);
+
+\pic[shift={(1.5,0,0)}] at (S-east) 
+    {Ball={
+        name=plus2,
+        fill=\PlusColor,
+        opacity=0.6,
+        radius=2,
+        logo=$\times$
+        }
+    };
+
+\draw [connection]  (D-east)    -| node {\midarrow} (plus2-north);
+
+\draw [connection]  (S-east)    -- node {\midarrow} (plus2-west);
+
+    \pic[shift={(1.5,0,0)}] at (plus2-east) 
+        {Box={
+            name=out,
+            caption={out[C,H$\times$W]},
+            fill=\ff,
+            opacity=0.5,
+            height=8,
+            width=10,
+            depth=0
+            }
+        };
+    
+\draw [connection]  (plus2-east)    -- node {\midarrow} (out-west);
+
+\pic[shift={(1.5,0,0)}] at (out-east) 
+    {Ball={
+        name=add,
+        fill=\SumColor,
+        opacity=0.6,
+        radius=2,
+        logo=$+$
+        }
+    };
+
+\draw [connection]  (out-east)    -- node {\midarrow} (add-west);
+
+\draw [connection]  (x-south)    -| node {\midarrow} (add-south);
+
+    \pic[shift={(2,0,0)}] at (add-east) 
+        {Box={
+            name=f,
+            caption={$f$[C,H,W]},
+            fill=\fff,
+            opacity=0.5,
+            height=15,
+            width=4,
+            depth=15
+            }
+        };
+    
+\draw [connection]  (add-east)    -- node {\midarrow} (f-west);
+
+\end{tikzpicture}
+\end{document}
